@@ -8,7 +8,6 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"fmt"
-	"log/slog"
 	"math/big"
 )
 
@@ -64,7 +63,6 @@ func (d *DCFScheme) GenerateKeys(n int, alpha int, beta int) (key0 *DCFKey, key1
 
 	for i := range n {
 		alphaBit := (alpha >> (n - i - 1)) & 1
-		slog.Debug("α[i]", "i", i, "value", alphaBit)
 
 		isPartyActive := [partyNum]bool{
 			ts[0][i] == 1,
@@ -86,8 +84,6 @@ func (d *DCFScheme) GenerateKeys(n int, alpha int, beta int) (key0 *DCFKey, key1
 		if alphaBit == 0 {
 			keep, lose = left, right
 		}
-
-		slog.Debug("alpha bit", "bit", alphaBit, "keep", keep, "lose", lose)
 
 		// s_{CW} = s_{0,Lose} ⊕ s_{1,Lose}
 		seedCW := make([]byte, d.lambdaInBits/8)
@@ -270,7 +266,6 @@ func (d *DCFScheme) Evaluate(key *DCFKey, x int) (*big.Int, error) {
 		}
 
 		xi := (x >> (n - i - 1)) & 1
-		slog.Debug("x[i]", "i", i, "value", xi)
 
 		if xi == 0 {
 			// V = V + (-1)^b * [Convert(v_{^,L}) + t[i] * V_{CW}]
