@@ -26,6 +26,10 @@ type DCFScheme struct {
 }
 
 func NewDCFScheme(lambdaInBits int, groupOrder *big.Int) *DCFScheme {
+	if !isPowerOfTwo(groupOrder) {
+		panic("unsupported group order: must be a power of two")
+	}
+
 	return &DCFScheme{
 		lambdaInBits: lambdaInBits,
 		groupOrder:   groupOrder,
@@ -401,10 +405,6 @@ func (d *DCFScheme) expandDCFNode(seed []byte) (*ExpandedDCFNode, error) {
 func (d *DCFScheme) mapToGroupElement(input []byte) (*big.Int, error) {
 	if len(input) != int(d.lambdaInBits/8) {
 		return nil, fmt.Errorf("value length must be equal to security parameter (%d != %d)", len(input), d.lambdaInBits/8)
-	}
-
-	if !isPowerOfTwo(d.groupOrder) {
-		return nil, fmt.Errorf("unsupported group order: must be a power of two")
 	}
 
 	k := d.groupOrder.BitLen() - 1
