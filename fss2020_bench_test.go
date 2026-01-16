@@ -12,10 +12,10 @@ import (
 // goarch: amd64
 // pkg: github.com/ras0q/fss2020
 // cpu: Intel(R) Core(TM) i7-8565U CPU @ 1.80GHz
-// BenchmarkGenerateKeys-8            31772             38988 ns/op           49064 B/op        633 allocs/op
-// BenchmarkEvaluate-8                66466             19521 ns/op           21928 B/op        195 allocs/op
+// BenchmarkGenerateKeys-8            14527             87694 ns/op           53313 B/op        740 allocs/op
+// BenchmarkEvaluate-8               181716              6484 ns/op            2312 B/op        117 allocs/op
 // PASS
-// ok      github.com/ras0q/fss2020        2.545s
+// ok      github.com/ras0q/fss2020        2.477s
 
 func BenchmarkGenerateKeys(b *testing.B) {
 	const (

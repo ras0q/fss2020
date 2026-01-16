@@ -9,6 +9,7 @@ import (
 	"crypto/rand"
 	"fmt"
 	"math/big"
+	"sync"
 )
 
 // NOTE: limited to 2 parties for now
@@ -21,12 +22,13 @@ const (
 type DCFScheme struct {
 	lambdaInBits int
 	groupOrder   *big.Int
+	nodeCache    sync.Map // map[Seed]*ExpandedDCFNode
 }
 
 func NewDCFScheme(lambdaInBits int, groupOrder *big.Int) *DCFScheme {
 	return &DCFScheme{
-		lambdaInBits,
-		groupOrder,
+		lambdaInBits: lambdaInBits,
+		groupOrder:   groupOrder,
 	}
 }
 
@@ -357,6 +359,10 @@ func (d *DCFScheme) expandDCFNode(seed []byte) (*ExpandedDCFNode, error) {
 		return nil, fmt.Errorf("seed length must be equal to security parameter: (%d != %d)", len(seed), lambdaInBytes)
 	}
 
+	if cachedNode, ok := d.nodeCache.Load(string(seed)); ok {
+		return cachedNode.(*ExpandedDCFNode), nil
+	}
+
 	block, err := aes.NewCipher(seed)
 	if err != nil {
 		return nil, fmt.Errorf("aes cipher creation error: %w", err)
@@ -386,12 +392,13 @@ func (d *DCFScheme) expandDCFNode(seed []byte) (*ExpandedDCFNode, error) {
 			output[4*lambdaInBytes+1] & 1,
 		},
 	}
+	d.nodeCache.Store(string(seed), node)
 
 	return node, nil
 }
 
 // Convert_𝔾: {0,1}^λ → 𝔾
-func (d DCFScheme) mapToGroupElement(input []byte) (*big.Int, error) {
+func (d *DCFScheme) mapToGroupElement(input []byte) (*big.Int, error) {
 	if len(input) != int(d.lambdaInBits/8) {
 		return nil, fmt.Errorf("value length must be equal to security parameter (%d != %d)", len(input), d.lambdaInBits/8)
 	}
