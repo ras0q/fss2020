@@ -20,9 +20,11 @@ const (
 )
 
 type DCFScheme struct {
-	lambdaInBits int
-	groupOrder   *big.Int
-	nodeCache    sync.Map // map[Seed]*ExpandedDCFNode
+	lambdaInBits  int
+	groupOrder    *big.Int
+	requiredBytes int
+	bitsToShift   uint
+	nodeCache     sync.Map // map[Seed]*ExpandedDCFNode
 }
 
 func NewDCFScheme(lambdaInBits int, groupOrder *big.Int) *DCFScheme {
@@ -30,9 +32,20 @@ func NewDCFScheme(lambdaInBits int, groupOrder *big.Int) *DCFScheme {
 		panic("unsupported group order: must be a power of two")
 	}
 
+	k := groupOrder.BitLen() - 1
+	if k > lambdaInBits {
+		panic(fmt.Sprintf("unsupported group order: bit length must be less than or equal to security parameter (%d > %d)", k, lambdaInBits))
+	}
+
+	requiredBytes := (k + 7) / 8
+	bitsToShift := uint(requiredBytes*8 - k) //nolint: gosec
+
 	return &DCFScheme{
-		lambdaInBits: lambdaInBits,
-		groupOrder:   groupOrder,
+		lambdaInBits:  lambdaInBits,
+		groupOrder:    groupOrder,
+		requiredBytes: requiredBytes,
+		bitsToShift:   bitsToShift,
+		nodeCache:     sync.Map{},
 	}
 }
 
@@ -407,20 +420,9 @@ func (d *DCFScheme) mapToGroupElement(input []byte) (*big.Int, error) {
 		return nil, fmt.Errorf("value length must be equal to security parameter (%d != %d)", len(input), d.lambdaInBits/8)
 	}
 
-	k := d.groupOrder.BitLen() - 1
-	if k > d.lambdaInBits {
-		return nil, fmt.Errorf("unsupported group order: bit length must be less than or equal to security parameter (%d > %d)", k, d.lambdaInBits)
-	}
-
 	// simply outputs the first k bits of the input
-	requiredBytes := (k + 7) / 8
-	if requiredBytes > len(input) {
-		return nil, fmt.Errorf("internal error: required bytes exceed input length (%d > %d)", requiredBytes, len(input))
-	}
-
-	output := new(big.Int).SetBytes(input[:requiredBytes])
-	bitsToShift := uint(requiredBytes*8 - k) //nolint: gosec
-	output.Rsh(output, bitsToShift)
+	output := new(big.Int).SetBytes(input[:d.requiredBytes])
+	output.Rsh(output, d.bitsToShift)
 
 	return output, nil
 }
