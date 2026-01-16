@@ -10,12 +10,12 @@ import (
 // $ go test -bench . -benchmem
 // goos: linux
 // goarch: amd64
-// pkg: github.com/ras0q/lab-playground/fss2020-go
+// pkg: github.com/ras0q/fss2020
 // cpu: Intel(R) Core(TM) i7-8565U CPU @ 1.80GHz
-// BenchmarkGenerateKeys-8            15211             95015 ns/op           49032 B/op        632 allocs/op
-// BenchmarkEvaluate-8                33783             30684 ns/op           21936 B/op        194 allocs/op
+// BenchmarkGenerateKeys-8            31772             38988 ns/op           49064 B/op        633 allocs/op
+// BenchmarkEvaluate-8                66466             19521 ns/op           21928 B/op        195 allocs/op
 // PASS
-// ok      github.com/ras0q/lab-playground/fss2020-go      2.493s
+// ok      github.com/ras0q/fss2020        2.545s
 
 func BenchmarkGenerateKeys(b *testing.B) {
 	const (
