@@ -42,7 +42,7 @@ func BenchmarkEvaluate(b *testing.B) {
 		lambda = 128
 		alpha  = 12345
 		beta   = 1
-		x      = 54321
+		x      = 20000
 	)
 
 	groupOrder := new(big.Int).Lsh(big.NewInt(1), 16)
