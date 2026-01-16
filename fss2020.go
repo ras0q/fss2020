@@ -19,6 +19,8 @@ const (
 	right = 1
 )
 
+var zeroIV = make([]byte, aes.BlockSize)
+
 type DCFScheme struct {
 	lambdaInBits  int
 	groupOrder    *big.Int
@@ -385,8 +387,7 @@ func (d *DCFScheme) expandDCFNode(seed []byte) (*ExpandedDCFNode, error) {
 		return nil, fmt.Errorf("aes cipher creation error: %w", err)
 	}
 
-	iv := make([]byte, aes.BlockSize)
-	stream := cipher.NewCTR(block, iv)
+	stream := cipher.NewCTR(block, zeroIV)
 
 	outputSize := (lambdaInBytes*2 + 1) * 2
 	output := make([]byte, outputSize)
