@@ -1,7 +1,6 @@
 package fss2020_test
 
 import (
-	"log/slog"
 	"math/big"
 	"testing"
 
@@ -91,8 +90,6 @@ func TestDCFScheme(t *testing.T) {
 			want:  0,
 		},
 	}
-
-	slog.SetLogLoggerLevel(slog.LevelDebug)
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
